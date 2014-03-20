@@ -26,8 +26,9 @@
 - (void)viewDidLoad
 {
     
-#warning set webservice url and parse GET or POST method in JSON
     [super viewDidLoad];
+    //--[self simpleJsonParsingGetMetod];
+#warning set webservice url to "jsonUrlString" & parse GET or POST method in JSON before access methods
     NSLog(@"Add Webservice URL and call any one method below");
 }
 
@@ -39,8 +40,8 @@
 
 - (void)simpleJsonParsingGetMetod
 {
-
-#warning set webservice url and parse GET method in JSON
+    
+#warning set webservice url to "jsonUrlString" & parse GET or POST method in JSON before access methods
     //-- Convert string into URL
     NSString *jsonUrlString = [NSString stringWithFormat:@"demo.com/your_server_db_name/service/link"];
     NSURL *url = [NSURL URLWithString:[jsonUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
@@ -51,7 +52,7 @@
     
     //-- Receive response from server
     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
-
+    
     //-- JSON Parsing with response data
     NSDictionary *result = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
     NSLog(@"Result = %@",result);
@@ -60,7 +61,8 @@
 - (void)simpleJsonParsingPostMetod
 {
     
-#warning set webservice url and parse POST method in JSON
+#warning set webservice url to "jsonUrlString" & parse GET or POST method in JSON before access methods
+    
     //-- Temp Initialized variables
     NSString *first_name;
     NSString *last_name;
@@ -83,14 +85,14 @@
     
     //-- For Sending text
     
-        //-- "firstname" is keyword form service
-        //-- "first_name" is the text which we have to send
+    //-- "firstname" is keyword form service
+    //-- "first_name" is the text which we have to send
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n",@"firstname"] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:@"%@",first_name] dataUsingEncoding:NSUTF8StringEncoding]];
     
-        //-- "lastname" is keyword form service
-        //-- "last_name" is the text which we have to send
+    //-- "lastname" is keyword form service
+    //-- "last_name" is the text which we have to send
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n",@"lastname"] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[[NSString stringWithFormat:@"%@",last_name] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -98,19 +100,48 @@
     
     //-- For sending image into service (send as imagedata)
     
-        //-- "image_name" is file name of the image (we can set custom name)
+    //-- "image_name" is file name of the image (we can set custom name)
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
     
     [body appendData:[[NSString stringWithFormat:@"Content-Disposition:form-data; name=\"file\"; filename=\"%@\"\r\n",image_name] dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
     [body appendData:[NSData dataWithData:imageData]];
     [body appendData:[[NSString stringWithFormat:@"\r\n--%@--\r\n",boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-
+    
     
     //-- Sending data into server through URL
     [request setHTTPBody:body];
     
     //-- Getting response form server
+    NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
+    
+    //-- JSON Parsing with response data
+    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableContainers error:nil];
+    NSLog(@"Result = %@",result);
+}
+
+
+- (void)simpleJsonParsingAuthentication
+{
+    //-- Convert username & password with base64 encrypeion
+    NSString *authStr = [NSString stringWithFormat:@"%@:%@", @"username", @"password"];
+    NSData *authData = [authStr dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *authValue = [NSString stringWithFormat:@"Basic %@", [authData base64EncodedStringWithOptions:0]];
+    
+    
+#warning set webservice url to "jsonUrlString" & parse GET or POST method in JSON before access methods
+    
+    //-- Convert string into URL
+    NSString *jsonUrlString = [NSString stringWithFormat:@"demo.com/your_server_db_name/service/link"];
+    NSURL *url = [NSURL URLWithString:[jsonUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+    
+    //-- Send request to server
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc]initWithURL:url];
+    //-- Send username & password for url authorization
+    [request setValue:authValue forHTTPHeaderField:@"Authorization"];
+    [request setHTTPMethod:@"POST"]; //-- Request method GET/POST
+    
+    //-- Receive response from server
     NSData *responseData = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil];
     
     //-- JSON Parsing with response data
